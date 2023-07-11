@@ -1,5 +1,8 @@
 #include "hblk_crypto.h"
 
+#define privetkey_size (strlen(folder) + strlen(PRI_FILENAME) + 2)
+#define pubkey_size (strlen(folder) + strlen(PRI_FILENAME) + 2)
+
 /**
  *ec_save - load a public/privet pair key from  file
  *@folder:path to the folder that will contain the files
@@ -9,8 +12,12 @@ EC_KEY *ec_load(char const *folder)
 {
 	EC_KEY *key = NULL;
 	FILE *pubKey, *privKey;
-	char prikeyFile[strlen(folder) + strlen(PRI_FILENAME) + 2];
-	char pubkeyFile[strlen(folder) + strlen(PUB_FILENAME) + 2];
+	char *prikeyFile, *pubkeyFile;
+
+	prikeyFile = malloc(sizeof(privetkey_size));
+	pubkeyFile = malloc(sizeof(pubkey_size));
+	if (!prikeyFile || !pubkeyFile)
+		return (0);
 
 	sprintf(prikeyFile, "%s/" PRI_FILENAME, folder);
 	sprintf(pubkeyFile, "%s/" PUB_FILENAME, folder);
@@ -37,5 +44,7 @@ EC_KEY *ec_load(char const *folder)
 		fclose(privKey);
 	}
 	fclose(privKey);
+	free(prikeyFile);
+	free(pubkeyFile);
 	return (key);
 }
