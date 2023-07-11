@@ -7,10 +7,11 @@
  */
 uint8_t *ec_to_pub(EC_KEY const *key, uint8_t pub[EC_PUB_LEN])
 {
-	if (!key || !pub)
-		return (NULL);
 	const EC_POINT *pubKey;
 	const EC_GROUP *group;
+
+	if (!key || !pub)
+		return (NULL);
 
 	pubKey = EC_KEY_get0_public_key(key);
 	if (!pubKey)
