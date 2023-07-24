@@ -69,5 +69,6 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 		if (handel_error_file_IO(&block->hash, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
 			return (-1);
 	}
+	fclose(fptr);
 	return (0);
 }
