@@ -40,7 +40,7 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 
 	size = llist_size(blockchain->chain);
 	endianess = _get_endianness();
-	fptr = fopen(path, "w");
+	fptr = fopen(path, "wb");
 	if (!fptr)
 		return (-1);
 	if (handel_error_file_IO(MAGIC_HBLK, 1, strlen(MAGIC_HBLK), fptr) == -1)
@@ -64,9 +64,9 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 		if (handel_error_file_IO(&block->data.len, 1, 4, fptr) == -1)
 			return (-1);
 		if (handel_error_file_IO(&block->data.buffer, 1,
-										 block->data.len, fptr) == -1)
+										 block->data.len + 1, fptr) == -1)
 			return (-1);
-		if (handel_error_file_IO(&block->hash, 1, 32, fptr) == -1)
+		if (handel_error_file_IO(&block->hash, 1, SHA256_DIGEST_LENGTH, fptr) == -1)
 			return (-1);
 	}
 	return (0);
