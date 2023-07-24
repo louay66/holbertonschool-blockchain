@@ -59,14 +59,14 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 			fclose(fptr);
 			return (-1);
 		}
-		if (handel_error_file_IO(&block->info, 1, sizeof(block->info), fptr) == -1)
+		if (handel_error_file_IO(&block->info, sizeof(block->info), 1, fptr) == -1)
 			return (-1);
-		if (handel_error_file_IO(&block->data.len, 1, 4, fptr) == -1)
+		if (handel_error_file_IO(&block->data.len, 4, 1, fptr) == -1)
 			return (-1);
-		if (handel_error_file_IO(&block->data.buffer, 1,
-										 block->data.len + 1, fptr) == -1)
+		if (handel_error_file_IO(&block->data.buffer,
+										 block->data.len + 1, 1, fptr) == -1)
 			return (-1);
-		if (handel_error_file_IO(&block->hash, 1, SHA256_DIGEST_LENGTH, fptr) == -1)
+		if (handel_error_file_IO(&block->hash, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
 			return (-1);
 	}
 	return (0);
