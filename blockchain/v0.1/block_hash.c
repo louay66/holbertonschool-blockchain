@@ -15,7 +15,7 @@ uint8_t *block_hash(block_t const *block,
 	if (!block || !hash_buf)
 		return (NULL);
 	SHA256_Init(&HASH256);
-	SHA256_Update(&HASH256, block, sizeof(block->data) + sizeof(block->info));
+	SHA256_Update(&HASH256, block, block->data.len + sizeof(block->info));
 	SHA256_Final(hash_buf, &HASH256);
 	return (hash_buf);
 }
