@@ -37,7 +37,6 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 
 	if (!blockchain || !blockchain->chain || !path)
 		return (-1);
-
 	size = llist_size(blockchain->chain);
 	endianess = _get_endianness();
 	fptr = fopen(path, "wb");
