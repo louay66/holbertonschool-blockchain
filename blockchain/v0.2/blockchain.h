@@ -11,6 +11,9 @@
 
 #include <openssl/sha.h>
 
+#define BLOCK_GENERATION_INTERVAL 1
+#define DIFFICULTY_ADJUSTMENT_INTERVAL 5
+
 /**
  * struct blockchain_s - Blockchain structure
  *
