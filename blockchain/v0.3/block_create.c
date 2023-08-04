@@ -7,10 +7,11 @@
  * Return:block_t if successful otherwise rturn NULL
  */
 block_t *block_create(block_t const *prev,
-		int8_t const *data, uint32_t data_len)
+							 int8_t const *data, uint32_t data_len)
 {
 	block_t *new_block;
 	time_t seconds;
+	llist_t *tx;
 
 	new_block = calloc(1, sizeof(*new_block));
 	if (!new_block || !prev || !data || data_len == 0)
@@ -37,5 +38,8 @@ block_t *block_create(block_t const *prev,
 	new_block->info.timestamp = (uint64_t)seconds;
 
 	memset(&(new_block->hash), 0, SHA256_DIGEST_LENGTH);
+
+	tx = llist_create(MT_SUPPORT_FALSE);
+	new_block->transactions = tx;
 	return (new_block);
 }
