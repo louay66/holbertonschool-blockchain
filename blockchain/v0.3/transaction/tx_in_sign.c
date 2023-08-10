@@ -17,7 +17,7 @@ sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH],
 {
 	uint8_t pub_of_sender[EC_PUB_LEN];
 	unspent_tx_out_t *unspent;
-	unsigned int i;
+	int i;
 
 	if (!ec_to_pub(sender, pub_of_sender))
 		return (NULL);
@@ -28,7 +28,7 @@ sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH],
 		if (memcmp(in->tx_out_hash, unspent->out.hash, 32) == 0)
 			break;
 	}
-	if (i == unspent)
+	if (i == llist_size(all_unspent))
 		return (NULL);
 	if (memcmp(pub_of_sender, unspent->out.pub, EC_PUB_LEN) != 0)
 		return (NULL);
