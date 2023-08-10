@@ -15,27 +15,32 @@
 sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH],
 						EC_KEY const *sender, llist_t *all_unspent)
 {
-	int unspent_len, i;
-	unspent_tx_out_t *temp;
-	uint8_t pubkey[EC_PUB_LEN];
+	uint8_t pub_of_sender[EC_PUB_LEN];
+	uint8_t pub_of_reciver[EC_PUB_LEN];
+	unspent_tx_out_t *unspent;
+	unsigned int i;
 
-	unspent_len = llist_size(all_unspent);
-	for (i = 0; i < unspent_len; i++)
+	if (!ec_to_pub(sender, pub_of_sender))
+		return (NULL);
+
+	i = 0;
+	while (1)
 	{
-		temp = llist_get_node_at(all_unspent, i);
-		if (memcmp(in->tx_out_hash, temp->out.hash, 32) == 0)
+		unspent = llist_get_node_at(all_unspent, i);
+		if (memcmp(unspent->out.hash, in->tx_out_hash, SHA256_DIGEST_LENGTH) == 0)
+		{
+			memcpy(pub_of_reciver, unspent->out.pub, EC_PUB_LEN);
 			break;
+		}
+		i++;
+		if (!unspent)
+		{
+			return (NULL);
+		}
 	}
-
-	if (i == unspent_len)
+	if (memcmp(pub_of_sender, pub_of_reciver, EC_PUB_LEN) != 0)
 		return (NULL);
-
-	ec_to_pub(sender, pubkey);
-
-	if (memcmp(pubkey, temp->out.pub, EC_PUB_LEN) != 0)
+	if (!ec_sign(sender, tx_id, SHA256_DIGEST_LENGTH, &in->sig))
 		return (NULL);
-
-	ec_sign(sender, tx_id, 32, &in->sig);
-
 	return (&in->sig);
 }
