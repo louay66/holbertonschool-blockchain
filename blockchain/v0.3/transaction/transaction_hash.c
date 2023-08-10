@@ -11,12 +11,10 @@
 uint8_t *transaction_hash(transaction_t const *transaction,
 								  uint8_t hash_buf[SHA256_DIGEST_LENGTH])
 {
-	SHA256_CTX HASH256;
 	llist_node_t *input, *output;
 	unsigned int i, in_len, out_len, cursor, size;
 	int8_t *space_hash;
 
-	SHA256_Init(&HASH256);
 	in_len = llist_size(transaction->inputs);
 	out_len = llist_size(transaction->outputs);
 	size = in_len * 32 * 3 + out_len * 32;
@@ -45,8 +43,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		}
 		i++;
 	}
-	SHA256_Update(&HASH256, space_hash, size);
-	SHA256_Final(hash_buf, &HASH256);
+	sha256(space_hash, size, hash_buf);
 	free(output);
 	free(input);
 	free(space_hash);
