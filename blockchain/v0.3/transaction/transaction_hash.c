@@ -13,7 +13,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 {
 	tx_in_t *input;
 	tx_out_t *output;
-	unsigned int i, in_len, out_len, cursor, size;
+	unsigned int i, j, in_len, out_len, cursor, size;
 	int8_t *space_hash;
 
 	in_len = llist_size(transaction->inputs);
@@ -24,6 +24,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		return (NULL);
 	cursor = 0;
 	i = 0;
+	j = 0;
 	while (1)
 	{
 		input = llist_get_node_at(transaction->inputs, i);
@@ -31,22 +32,21 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		{
 			memcpy(space_hash + cursor, input, 32 * 3);
 			cursor += 32 * 3;
+			i++;
 		}
-		output = llist_get_node_at(transaction->outputs, i);
+		output = llist_get_node_at(transaction->outputs, j);
 		if (output && !input)
 		{
 			memcpy(space_hash + cursor, output->hash, 32);
 			cursor += 32;
+			j++;
 		}
 		if (!input && !output)
 		{
 			break;
 		}
-		i++;
-	}
+		}
 	sha256(space_hash, size, hash_buf);
-	free(output);
-	free(input);
 	free(space_hash);
 	return (hash_buf);
 }
