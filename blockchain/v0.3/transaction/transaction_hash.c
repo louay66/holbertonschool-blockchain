@@ -11,7 +11,8 @@
 uint8_t *transaction_hash(transaction_t const *transaction,
 								  uint8_t hash_buf[SHA256_DIGEST_LENGTH])
 {
-	llist_node_t *input, *output;
+	tx_in_t *input;
+	tx_out_t *output;
 	unsigned int i, in_len, out_len, cursor, size;
 	int8_t *space_hash;
 
@@ -34,7 +35,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		output = llist_get_node_at(transaction->outputs, i);
 		if (output)
 		{
-			memcpy(space_hash + cursor, output, 32);
+			memcpy(space_hash + cursor, output->hash, 32);
 			cursor += 32;
 		}
 		if (!input && !output)
