@@ -36,10 +36,10 @@ void select_sender_unspent(llist_t *all_unspent, visitor_t *visitor)
  * or NULL upon failure.
  */
 transaction_t *build_tx(EC_KEY const *sender,
-		visitor_t *visitor,
-		llist_t *all_unspent, uint8_t *sender_pub,
-		uint8_t *receiver_pub,
-		transaction_t *tx)
+								visitor_t *visitor,
+								llist_t *all_unspent, uint8_t *sender_pub,
+								uint8_t *receiver_pub,
+								transaction_t *tx)
 {
 	int i;
 	tx_out_t *to_sender, *to_reciver;
@@ -50,12 +50,13 @@ transaction_t *build_tx(EC_KEY const *sender,
 	tx->outputs = llist_create(MT_SUPPORT_FALSE);
 	to_reciver = tx_out_create(visitor->amount, receiver_pub);
 	to_sender = visitor->total_amount > visitor->amount
-		? tx_out_create(visitor->total_amount - visitor->amount, sender_pub) : 0;
+						 ? tx_out_create(visitor->total_amount - visitor->amount, sender_pub)
+						 : 0;
 	if (!tx->inputs || !tx->outputs || !to_reciver ||
-			(visitor->total_amount > visitor->amount && !to_sender))
+		 (visitor->total_amount > visitor->amount && !to_sender))
 	{
 		return (llist_destroy(tx->inputs, 1, free),
-				llist_destroy(tx->outputs, 1, free), free(tx), NULL);
+				  llist_destroy(tx->outputs, 1, free), free(tx), NULL);
 	}
 	for (i = 0; i < llist_size(visitor->sender_unspent); i++)
 	{
@@ -67,7 +68,7 @@ transaction_t *build_tx(EC_KEY const *sender,
 			exit(1);
 	}
 	if (llist_add_node(tx->outputs, to_reciver, ADD_NODE_REAR) ||
-			(to_sender && llist_add_node(tx->outputs, to_sender, ADD_NODE_REAR)))
+		 (to_sender && llist_add_node(tx->outputs, to_sender, ADD_NODE_REAR)))
 		exit(1);
 	if (!transaction_hash(tx, tx->id))
 		exit(1);
@@ -79,7 +80,6 @@ transaction_t *build_tx(EC_KEY const *sender,
 			exit(1);
 	}
 	llist_destroy(visitor->sender_unspent, 0, NULL);
-	printf("2\n");
 	return (tx);
 }
 /**
@@ -92,7 +92,7 @@ transaction_t *build_tx(EC_KEY const *sender,
  * or NULL upon failure
  */
 transaction_t *transaction_create(EC_KEY const *sender, EC_KEY const *receiver,
-		uint32_t amount, llist_t *all_unspent)
+											 uint32_t amount, llist_t *all_unspent)
 {
 	uint8_t sender_pub[EC_PUB_LEN], receiver_pub[EC_PUB_LEN];
 	visitor_t visitor = {0};
@@ -119,5 +119,5 @@ transaction_t *transaction_create(EC_KEY const *sender, EC_KEY const *receiver,
 	if (!tx)
 		return (NULL);
 	return (build_tx(sender, &visitor, all_unspent, sender_pub,
-				receiver_pub, tx));
+						  receiver_pub, tx));
 }
