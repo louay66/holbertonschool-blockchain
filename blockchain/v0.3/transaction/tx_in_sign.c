@@ -22,20 +22,14 @@ sig_t *tx_in_sign(tx_in_t *in, uint8_t const tx_id[SHA256_DIGEST_LENGTH],
 	if (!ec_to_pub(sender, pub_of_sender))
 		return (NULL);
 
-	i = 0;
-	while (1)
+	for (i = 0; i < llist_size(all_unspent); i++)
 	{
 		unspent = llist_get_node_at(all_unspent, i);
-		if (memcmp(unspent->out.hash, in->tx_out_hash, SHA256_DIGEST_LENGTH) == 0)
-		{
+		if (memcmp(in->tx_out_hash, unspent->out.hash, 32) == 0)
 			break;
-		}
-		i++;
-		if (!unspent)
-		{
-			return (NULL);
-		}
 	}
+	if (i == unspent)
+		return (NULL);
 	if (memcmp(pub_of_sender, unspent->out.pub, EC_PUB_LEN) != 0)
 		return (NULL);
 	if (!ec_sign(sender, tx_id, SHA256_DIGEST_LENGTH, &in->sig))
