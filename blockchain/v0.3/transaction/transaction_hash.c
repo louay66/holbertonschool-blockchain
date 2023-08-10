@@ -13,24 +13,31 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 {
 	SHA256_CTX HASH256;
 	llist_node_t *input, *output;
-	unsigned int i;
+	unsigned int i, in_len, out_len, cursor, size;
+	int8_t *space_hash;
 
 	SHA256_Init(&HASH256);
-
+	in_len = llist_size(transaction->inputs);
+	out_len = llist_size(transaction->outputs);
+	size = in_len * 32 * 3 + out_len * 32;
+	space_hash = malloc(size);
+	if (!space_hash)
+		return (NULL);
+	cursor = 0;
 	i = 0;
 	while (1)
 	{
 		input = llist_get_node_at(transaction->inputs, i);
 		if (input)
 		{
-			SHA256_Update(&HASH256, ((tx_in_t *)input)->block_hash, 32);
-			SHA256_Update(&HASH256, ((tx_in_t *)input)->tx_out_hash, 32);
-			SHA256_Update(&HASH256, ((tx_in_t *)input)->tx_id, 32);
+			memcpy(space_hash + cursor, input, 32 * 3);
+			cursor += 32 * 3;
 		}
 		output = llist_get_node_at(transaction->outputs, i);
 		if (output)
 		{
-			SHA256_Update(&HASH256, ((tx_out_t *)output)->hash, 32);
+			memcpy(space_hash + cursor, output, 32);
+			cursor += 32;
 		}
 		if (!input && !output)
 		{
@@ -38,8 +45,10 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 		}
 		i++;
 	}
+	SHA256_Update(&HASH256, space_hash, size);
 	SHA256_Final(hash_buf, &HASH256);
 	free(output);
 	free(input);
+	free(space_hash);
 	return (hash_buf);
 }
