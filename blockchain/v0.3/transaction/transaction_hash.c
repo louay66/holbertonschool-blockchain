@@ -33,7 +33,7 @@ uint8_t *transaction_hash(transaction_t const *transaction,
 			cursor += 32 * 3;
 		}
 		output = llist_get_node_at(transaction->outputs, i);
-		if (output)
+		if (output && !input)
 		{
 			memcpy(space_hash + cursor, output->hash, 32);
 			cursor += 32;
