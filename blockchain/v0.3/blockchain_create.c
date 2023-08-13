@@ -16,8 +16,8 @@ blockchain_t *blockchain_create(void)
 
 	blockchain = calloc(1, sizeof(*blockchain));
 	block = calloc(1, sizeof(*block));
-	list = llist_create(MT_SUPPORT_TRUE);
-	unspent = llist_create(MT_SUPPORT_TRUE);
+	list = llist_create(MT_SUPPORT_FALSE);
+	unspent = llist_create(MT_SUPPORT_FALSE);
 
 	if (!blockchain || !block || !list)
 	{
