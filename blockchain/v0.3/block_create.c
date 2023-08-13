@@ -11,7 +11,6 @@ block_t *block_create(block_t const *prev,
 {
 	block_t *new_block;
 	time_t seconds;
-	llist_t *tx;
 
 	new_block = calloc(1, sizeof(*new_block));
 	if (!new_block || !prev || !data || data_len == 0)
@@ -20,9 +19,6 @@ block_t *block_create(block_t const *prev,
 		free(new_block);
 		return (NULL);
 	}
-	if (!tx)
-		return (free(new_block), llist_destroy(tx, 0, NULL), NULL);
-
 	memcpy(&(new_block->info.prev_hash), prev->hash, SHA256_DIGEST_LENGTH);
 	if (data_len >= BLOCKCHAIN_DATA_MAX)
 	{
