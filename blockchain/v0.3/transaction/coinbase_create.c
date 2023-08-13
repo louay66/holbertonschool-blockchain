@@ -10,34 +10,34 @@
  */
 transaction_t *coinbase_create(EC_KEY const *receiver, uint32_t block_index)
 {
-	transaction_t *out;
-	tx_in_t *i_token;
-	tx_out_t *o_token;
-	uint8_t key_out[EC_PUB_LEN];
+	transaction_t *tx;
+	tx_in_t *tx_in;
+	tx_out_t *tx_out;
+	uint8_t pub_key[EC_PUB_LEN];
 
-	out = malloc(sizeof(transaction_t));
-	if (out == NULL)
+	tx = malloc(sizeof(transaction_t));
+	if (tx == NULL)
 		return (NULL);
-	i_token = malloc(sizeof(tx_in_t));
-	if (i_token == NULL)
+	tx_in = malloc(sizeof(tx_in_t));
+	if (tx_in == NULL)
 	{
-		free(out);
+		free(tx);
 		return (NULL);
 	}
 
-	memset(i_token, 0, sizeof(*i_token));
-	memcpy(i_token->tx_out_hash, &block_index, 4);
+	memset(tx_in, 0, sizeof(*tx_in));
+	memcpy(tx_in->tx_out_hash, &block_index, 4);
 
-	ec_to_pub(receiver, key_out);
-	o_token = tx_out_create(COINBASE_AMOUNT, key_out);
+	ec_to_pub(receiver, pub_key);
+	tx_out = tx_out_create(COINBASE_AMOUNT, pub_key);
 
-	out->inputs = llist_create(MT_SUPPORT_FALSE);
-	out->outputs = llist_create(MT_SUPPORT_FALSE);
+	tx->inputs = llist_create(MT_SUPPORT_FALSE);
+	tx->outputs = llist_create(MT_SUPPORT_FALSE);
 
-	llist_add_node(out->inputs, i_token, ADD_NODE_REAR);
-	llist_add_node(out->outputs, o_token, ADD_NODE_REAR);
+	llist_add_node(tx->inputs, tx_in, ADD_NODE_REAR);
+	llist_add_node(tx->outputs, tx_out, ADD_NODE_REAR);
 
-	transaction_hash(out, out->id);
+	transaction_hash(tx, out->id);
 
 	return (out);
 }
