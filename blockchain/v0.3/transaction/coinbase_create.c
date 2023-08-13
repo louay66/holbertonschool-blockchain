@@ -37,7 +37,7 @@ transaction_t *coinbase_create(EC_KEY const *receiver, uint32_t block_index)
 	llist_add_node(tx->inputs, tx_in, ADD_NODE_REAR);
 	llist_add_node(tx->outputs, tx_out, ADD_NODE_REAR);
 
-	transaction_hash(tx, out->id);
+	transaction_hash(tx, tx->id);
 
-	return (out);
+	return (tx);
 }
