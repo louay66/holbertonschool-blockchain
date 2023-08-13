@@ -23,7 +23,9 @@ unsigned int check_input(llist_t *inputs, llist_t *all_unspent,
 		for (j = 0; j < llist_size(all_unspent); j++)
 		{
 			unspent = llist_get_node_at(all_unspent, j);
-			if (!memcmp(input->tx_out_hash, unspent->out.hash, SHA256_DIGEST_LENGTH))
+			if (!memcmp(input->tx_out_hash, unspent->out.hash, SHA256_DIGEST_LENGTH) &&
+				 !memcmp(input->tx_id, unspent->tx_id, SHA256_DIGEST_LENGTH) &&
+				 !memcmp(input->block_hash, unspent->block_hash, SHA256_DIGEST_LENGTH))
 			{
 				is_refer++;
 				in_balance += unspent->out.amount;
