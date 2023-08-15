@@ -5,6 +5,7 @@
 #define VERSION_HBLK "0.1"
 #define CHECK_ENDIAN(x) (endianess ? SWAPENDIAN(x) : (void)0)
 
+llist_t *deserialize_unspent(FILE *file, int size, uint8_t endianess);
 llist_t *deserialize_blocks(FILE *file, int size, uint8_t endianess);
 llist_t *deserialize_tx(FILE *file, int size, uint8_t endianess);
 llist_t *deserialize_tx_in(FILE *file, int size);
@@ -69,7 +70,7 @@ blockchain_t *blockchain_deserialize(char const *path)
  * @endianess: if 1 is big endian need to swap byte  else lettle endien
  * Return: if successful return hash otherwise return NULL
  */
-deserialize_unspent(FILE *file, int size, uint8_t endianess)
+llist_t *deserialize_unspent(FILE *file, int size, uint8_t endianess)
 {
 	llist_t *list_unspent;
 	unspent_tx_out_t *unspent;
