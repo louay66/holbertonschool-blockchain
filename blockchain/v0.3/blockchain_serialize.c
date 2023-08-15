@@ -20,10 +20,9 @@ int unspent_serialise(llist_t *unspent_list, FILE *fptr, int size);
 
 int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 {
-	int size_block, size_unspent, i;
+	int size_block, size_unspent;
 	FILE *fptr;
 	uint8_t endianess;
-	unspent_tx_out_t *unspent;
 
 	if (!blockchain || !blockchain->chain || !path)
 		return (-1);
@@ -63,7 +62,7 @@ int block_serialise(llist_t *chain, FILE *fptr, int size)
 	int i, size_tx;
 	block_t *block;
 
-	for (i == 0; i < size; i++)
+	for (i = 0; i < size; i++)
 	{
 		block = llist_get_node_at(chain, i);
 		size_tx = llist_size(block->transactions);
@@ -97,7 +96,7 @@ int unspent_serialise(llist_t *unspent_list, FILE *fptr, int size)
 	int i;
 	unspent_tx_out_t *unspent;
 
-	for (i == 0; i < size; i++)
+	for (i = 0; i < size; i++)
 	{
 		unspent = llist_get_node_at(unspent_list, i);
 		if (handel_error_file_IO(&unspent->block_hash, SHA256_DIGEST_LENGTH,
@@ -126,26 +125,25 @@ int unspent_serialise(llist_t *unspent_list, FILE *fptr, int size)
 int tx_serialise(llist_t *trx, FILE *fptr)
 {
 	int size_tx, size_in, size_out, i;
-	transaction_t tx;
-	block_t *block;
+	transaction_t *tx;
 
 	size_tx = llist_size(trx);
 
-	for (i == 0; i < size_tx; i++)
+	for (i = 0; i < size_tx; i++)
 	{
 		tx = llist_get_node_at(trx, i);
-		size_in = llist_size(tx.inputs);
-		size_out = llist_size(tx.outputs);
+		size_in = llist_size(tx->inputs);
+		size_out = llist_size(tx->outputs);
 
-		if (handel_error_file_IO(&tx.id, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
+		if (handel_error_file_IO(&tx->id, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
 			return (-1);
 		if (handel_error_file_IO(&size_in, 4, 1, fptr) == -1)
 			return (-1);
 		if (handel_error_file_IO(&size_out, 4, 1, fptr) == -1)
 			return (-1);
-		if (tx_input_serialise(tx.inputs, fptr) == -1)
+		if (tx_input_serialise(tx->inputs, fptr) == -1)
 			return (-1);
-		if (tx_output_serialise(tx.outputs, fptr) == -1)
+		if (tx_output_serialise(tx->outputs, fptr) == -1)
 			return (-1);
 	}
 	return (0);
