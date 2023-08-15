@@ -315,7 +315,7 @@ llist_t *deserialize_tx_out(FILE *file, int size, uint8_t endianess)
 	outputs = llist_create(MT_SUPPORT_FALSE);
 	if (!outputs)
 		return (NULL);
-	for (i = 0; i < outputs; i++)
+	for (i = 0; i < size; i++)
 	{
 		out = calloc(1, sizeof(*out));
 		if (!out)
