@@ -2,7 +2,7 @@
 #include "provided/endianness.h"
 
 #define MAGIC_HBLK "HBLK"
-#define VERSION_HBLK "0.1"
+#define VERSION_HBLK "0.3"
 int tx_input_serialise(llist_t *input, FILE *fptr);
 int tx_output_serialise(llist_t *output, FILE *fptr);
 int tx_serialise(llist_t *trx, FILE *fptr);

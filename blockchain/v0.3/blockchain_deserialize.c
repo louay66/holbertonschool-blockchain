@@ -2,7 +2,7 @@
 #include "provided/endianness.h"
 
 #define MAGIC_HBLK "HBLK"
-#define VERSION_HBLK "0.1"
+#define VERSION_HBLK "0.3"
 
 llist_t *deserialize_unspent(FILE *file, int size);
 llist_t *deserialize_blocks(FILE *file, int size);
