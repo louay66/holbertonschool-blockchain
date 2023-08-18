@@ -3,8 +3,6 @@
 
 #define MAGIC_HBLK "HBLK"
 #define VERSION_HBLK "0.1"
-int handel_error_file_IO(const void *ptr, size_t size, size_t nmemb,
-								 FILE *stream);
 int tx_input_serialise(llist_t *input, FILE *fptr);
 int tx_output_serialise(llist_t *output, FILE *fptr);
 int tx_serialise(llist_t *trx, FILE *fptr);
@@ -26,26 +24,21 @@ int blockchain_serialize(blockchain_t const *blockchain, char const *path)
 
 	if (!blockchain || !blockchain->chain || !path)
 		return (-1);
+
 	size_block = llist_size(blockchain->chain);
 	size_unspent = llist_size(blockchain->unspent);
 	endianess = _get_endianness();
 	fptr = fopen(path, "wb");
 	if (!fptr)
 		return (-1);
-	if (handel_error_file_IO(MAGIC_HBLK, 1, strlen(MAGIC_HBLK), fptr) == -1)
-		return (-1);
-	if (handel_error_file_IO(VERSION_HBLK, 1, strlen(VERSION_HBLK), fptr) == -1)
-		return (-1);
-	if (handel_error_file_IO(&endianess, 1, 1, fptr) == -1)
-		return (-1);
-	if (handel_error_file_IO(&size_block, 1, 4, fptr) == -1)
-		return (-1);
-	if (handel_error_file_IO(&size_unspent, 1, 4, fptr) == -1)
-		return (-1);
-	if (block_serialise(blockchain->chain, fptr, size_block))
-		return (-1);
-	if (unspent_serialise(blockchain->unspent, fptr, size_unspent))
-		return (-1);
+	fwrite(MAGIC_HBLK, 1, 4, fptr);
+	fwrite(VERSION_HBLK, 1, 3, fptr);
+	fwrite(&endianess, 1, 1, fptr);
+	fwrite(&size_block, 1, 4, fptr);
+	fwrite(&size_unspent, 1, 4, fptr);
+
+	block_serialise(blockchain->chain, fptr, size_block);
+	unspent_serialise(blockchain->unspent, fptr, size_unspent);
 	fclose(fptr);
 	return (0);
 }
@@ -65,21 +58,22 @@ int block_serialise(llist_t *chain, FILE *fptr, int size)
 	for (i = 0; i < size; i++)
 	{
 		block = llist_get_node_at(chain, i);
-		size_tx = llist_size(block->transactions);
-		if (handel_error_file_IO(&block->info, sizeof(block->info), 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&block->data.len, 4, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&block->data.buffer,
-										 block->data.len + 1, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&block->hash, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
-			return (-1);
+		fwrite(&block->info, 1, sizeof(block->info), fptr);
 
-		if (handel_error_file_IO(&size_tx, 4, 1, fptr) == -1)
-			return (-1);
-		if (tx_serialise(block->transactions, fptr) == -1)
-			return (-1);
+		fwrite(&block->data.len, 1, 4, fptr);
+		fwrite(&block->data.buffer, 1,
+				 block->data.len, fptr);
+		fwrite(&block->hash, 1, SHA256_DIGEST_LENGTH, fptr);
+		if (block->info.index == 0)
+		{
+			size_tx = -1;
+		}
+		else
+		{
+			size_tx = llist_size(block->transactions);
+		}
+		fwrite(&size_tx, 1, 4, fptr);
+		tx_serialise(block->transactions, fptr);
 	}
 	return (0);
 }
@@ -99,19 +93,7 @@ int unspent_serialise(llist_t *unspent_list, FILE *fptr, int size)
 	for (i = 0; i < size; i++)
 	{
 		unspent = llist_get_node_at(unspent_list, i);
-		if (handel_error_file_IO(&unspent->block_hash, SHA256_DIGEST_LENGTH,
-										 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&unspent->tx_id, SHA256_DIGEST_LENGTH,
-										 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&unspent->out.amount, 4, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&unspent->out.pub, 65, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&unspent->out.hash, SHA256_DIGEST_LENGTH,
-										 1, fptr) == -1)
-			return (-1);
+		fwrite(unspent, 1, 165, fptr);
 	}
 	return (0);
 }
@@ -135,16 +117,11 @@ int tx_serialise(llist_t *trx, FILE *fptr)
 		size_in = llist_size(tx->inputs);
 		size_out = llist_size(tx->outputs);
 
-		if (handel_error_file_IO(&tx->id, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&size_in, 4, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&size_out, 4, 1, fptr) == -1)
-			return (-1);
-		if (tx_input_serialise(tx->inputs, fptr) == -1)
-			return (-1);
-		if (tx_output_serialise(tx->outputs, fptr) == -1)
-			return (-1);
+		fwrite(&tx->id, 1, SHA256_DIGEST_LENGTH, fptr);
+		fwrite(&size_in, 1, 4, fptr);
+		fwrite(&size_out, 1, 4, fptr);
+		tx_input_serialise(tx->inputs, fptr);
+		tx_output_serialise(tx->outputs, fptr);
 	}
 	return (0);
 }
@@ -164,18 +141,7 @@ int tx_input_serialise(llist_t *input, FILE *fptr)
 	{
 		tx_in = llist_get_node_at(input, i);
 
-		if (handel_error_file_IO(&tx_in->block_hash, SHA256_DIGEST_LENGTH,
-										 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_in->tx_id, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_in->tx_out_hash, SHA256_DIGEST_LENGTH,
-										 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_in->sig.sig, 72, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_in->sig.len, 1, 1, fptr) == -1)
-			return (-1);
+		fwrite(tx_in, 1, 169, fptr);
 	}
 	return (0);
 }
@@ -194,31 +160,7 @@ int tx_output_serialise(llist_t *output, FILE *fptr)
 	for (i = 0; i < size_out; i++)
 	{
 		tx_out = llist_get_node_at(output, i);
-		if (handel_error_file_IO(&tx_out->amount, 4, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_out->pub, 65, 1, fptr) == -1)
-			return (-1);
-		if (handel_error_file_IO(&tx_out->hash, SHA256_DIGEST_LENGTH, 1, fptr) == -1)
-			return (-1);
-	}
-	return (0);
-}
-
-/**
- * handel_error_file_IO-handell error of fwrite
- * @ptr: pointer to write
- * @size: ype of byte going to write
- * @nmemb: number of bytes
- * @stream: pointer to file
- * Return: if successful return 0 otherwise return -1
- */
-int handel_error_file_IO(const void *ptr, size_t size, size_t nmemb,
-								 FILE *stream)
-{
-	if (fwrite(ptr, size, nmemb, stream) != nmemb)
-	{
-		fclose(stream);
-		return (-1);
+		fwrite(tx_out, 1, 101, fptr);
 	}
 	return (0);
 }
